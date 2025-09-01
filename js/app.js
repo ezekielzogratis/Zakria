@@ -1853,13 +1853,11 @@ class RServiceTracker {
 
     async handlePaidClick() {
         try {
-            // Add loading animation
             const paidBtn = document.getElementById('paidBtn');
             if (paidBtn) {
                 paidBtn.classList.add('loading');
             }
 
-            // Small delay to show loading animation
             await new Promise(resolve => setTimeout(resolve, 500));
 
             if (this.pendingUnpaidDates.length === 0) {
@@ -1869,14 +1867,12 @@ class RServiceTracker {
                 }
                 return;
             }
-            
-            // Remove loading and show date selection modal
+
             if (paidBtn) {
                 paidBtn.classList.remove('loading');
             }
-            
+
             this.showDateSelectionModal();
-            
         } catch (error) {
             console.error('Error opening payment modal:', error);
             this.notifications.showToast('Error opening payment selection', 'error');
@@ -1887,66 +1883,70 @@ class RServiceTracker {
         }
     }
 
+    async showPaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        if (!modal) return;
 
+        await this.updatePendingUnpaidDates();
+        this.generatePaymentButtons();
 
-    async updatePendingUnpaidDates() {
-        try {
-            const workRecords = await this.db.getAllWorkRecords();
-            const payments = await this.db.getAllPayments();
-            
-            const unpaidRecords = workRecords.filter(record => 
-                record.status === 'completed' && !this.isRecordPaid(record, payments)
-            );
-            
-            this.pendingUnpaidDates = unpaidRecords.map(record => record.date);
-            console.log('Updated pending dates:', this.pendingUnpaidDates);
-        } catch (error) {
-            console.error('Error updating pending dates:', error);
-        }
+        const unpaidDaysEl = document.getElementById('unpaidDaysCount');
+        const pendingAmountEl = document.getElementById('pendingAmount');
+        const dailyWageEl = document.getElementById('dailyWageDisplay');
+
+        if (unpaidDaysEl) unpaidDaysEl.textContent = this.pendingUnpaidDates.length;
+        if (pendingAmountEl) pendingAmountEl.textContent = this.utils.formatCurrency(this.pendingUnpaidDates.length * (window.R_SERVICE_CONFIG?.DAILY_WAGE || 25));
+        if (dailyWageEl) dailyWageEl.textContent = this.utils.formatCurrency(window.R_SERVICE_CONFIG?.DAILY_WAGE || 25);
+
+        const paymentSummaryCard = document.getElementById('paymentSummaryCard');
+        const paymentConfirmation = document.getElementById('paymentConfirmation');
+
+        if (paymentSummaryCard) paymentSummaryCard.style.display = 'block';
+        if (paymentConfirmation) paymentConfirmation.style.display = 'none';
+
+        modal.classList.add('show');
     }
 
-    showDateSelectionModal() {
-        const modal = document.getElementById('dateSelectionModal');
-        if (modal) {
-            modal.classList.add('show');
-            this.setupDateSelectionHandlers();
-        }
+    generatePaymentButtons() {
+        const container = document.getElementById('paymentButtons');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const amounts = window.ConfigManager ? window.ConfigManager.generatePaymentAmounts() : [25, 50, 75, 100];
+
+        amounts.forEach(amount => {
+            const button = document.createElement('button');
+            button.className = 'btn btn-secondary';
+            button.textContent = this.utils.formatCurrency(amount);
+            button.dataset.amount = amount;
+            button.addEventListener('click', () => {
+                this.selectedPaymentAmount = amount;
+                this.showPaymentConfirmation(amount, 'Regular Payment');
+            });
+            container.appendChild(button);
+        });
     }
 
-    setupDateSelectionHandlers() {
-        const modal = document.getElementById('dateSelectionModal');
-        const todayBtn = document.getElementById('todayDateBtn');
-        const previousBtn = document.getElementById('previousDateBtn');
-        const closeBtn = document.getElementById('closeDateSelectionModal');
+    showPaymentConfirmation(amount, type) {
+        const paymentConfirmation = document.getElementById('paymentConfirmation');
+        const confirmAmountEl = document.getElementById('confirmAmount');
+        const confirmTypeEl = document.getElementById('confirmType');
 
-        const closeModal = () => {
-            modal.classList.remove('show');
-        };
-
-        // Close modal handlers
-        if (closeBtn) {
-            closeBtn.onclick = closeModal;
+        if (paymentConfirmation && confirmAmountEl && confirmTypeEl) {
+            confirmAmountEl.textContent = this.utils.formatCurrency(amount);
+            confirmTypeEl.textContent = type;
+            paymentConfirmation.style.display = 'flex';
         }
 
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        };
-
-        // Today button - use existing payment flow
-        if (todayBtn) {
-            todayBtn.onclick = () => {
-                closeModal();
-                this.showPaymentModal();
-            };
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => this.processPayment();
         }
 
-        // Previous date button - show calendar selection
-        if (previousBtn) {
-            previousBtn.onclick = () => {
-                closeModal();
-                this.showCalendarSelectionModal();
+        const cancelBtn = document.getElementById('cancelPaymentBtn');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                if (paymentConfirmation) paymentConfirmation.style.display = 'none';
             };
         }
     }
@@ -1956,10 +1956,52 @@ class RServiceTracker {
         const calendarContainer = document.getElementById('unpaidWorkCalendar');
         
         if (modal && calendarContainer) {
-            // Generate unpaid work calendar
             await this.generateUnpaidWorkCalendar(calendarContainer);
             modal.classList.add('show');
             this.setupCalendarSelectionHandlers();
+
+            const calendarSummaryCard = document.getElementById('calendarPaymentSummaryCard');
+            const calendarPaymentSummary = document.getElementById('calendarPaymentSummary');
+
+            if (calendarSummaryCard) calendarSummaryCard.style.display = 'block';
+            if (calendarPaymentSummary) calendarPaymentSummary.style.display = 'none';
+        }
+    }
+
+    setupCalendarSelectionHandlers() {
+        const confirmBtn = document.getElementById('confirmCalendarDirectPaymentBtn');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => {
+                const selectedDates = this.getSelectedCalendarDates();
+                if (selectedDates.length > 0) {
+                    const totalAmount = selectedDates.reduce((acc, date) => acc + parseFloat(date.amount), 0);
+                    this.showCalendarPaymentConfirmation(totalAmount, 'Direct Payment');
+                }
+            };
+        }
+    }
+
+    showCalendarPaymentConfirmation(amount, type) {
+        const calendarPaymentSummary = document.getElementById('calendarPaymentSummary');
+        const calendarSelectedAmountDisplay = document.getElementById('calendarSelectedAmountDisplay');
+        const calendarPaymentTypeDisplay = document.getElementById('calendarPaymentTypeDisplay');
+
+        if (calendarPaymentSummary && calendarSelectedAmountDisplay && calendarPaymentTypeDisplay) {
+            calendarSelectedAmountDisplay.textContent = this.utils.formatCurrency(amount);
+            calendarPaymentTypeDisplay.textContent = type;
+            calendarPaymentSummary.style.display = 'block';
+        }
+
+        const confirmBtn = document.getElementById('confirmCalendarPaymentBtn');
+        if (confirmBtn) {
+            confirmBtn.onclick = () => this.processCalendarPayment();
+        }
+
+        const cancelBtn = document.getElementById('cancelCalendarPaymentBtn');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                if (calendarPaymentSummary) calendarPaymentSummary.style.display = 'none';
+            };
         }
     }
 
