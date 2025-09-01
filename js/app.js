@@ -1883,6 +1883,65 @@ class RServiceTracker {
         }
     }
 
+    showDateSelectionModal() {
+        const modal = document.getElementById('dateSelectionModal');
+        if (modal) {
+            modal.classList.add('show');
+            this.setupDateSelectionHandlers();
+        }
+    }
+
+    setupDateSelectionHandlers() {
+        const modal = document.getElementById('dateSelectionModal');
+        const todayBtn = document.getElementById('todayDateBtn');
+        const previousBtn = document.getElementById('previousDateBtn');
+        const closeBtn = document.getElementById('closeDateSelectionModal');
+
+        const closeModal = () => {
+            modal.classList.remove('show');
+        };
+
+        if (closeBtn) {
+            closeBtn.onclick = closeModal;
+        }
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        };
+
+        if (todayBtn) {
+            todayBtn.onclick = () => {
+                closeModal();
+                this.showPaymentModal();
+            };
+        }
+
+        if (previousBtn) {
+            previousBtn.onclick = () => {
+                closeModal();
+                this.showCalendarSelectionModal();
+            };
+        }
+    }
+
+    async updatePendingUnpaidDates() {
+        try {
+            const workRecords = await this.db.getAllWorkRecords();
+            const payments = await this.db.getAllPayments();
+            
+            const unpaidRecords = workRecords.filter(record => 
+                record.status === 'completed' && !this.isRecordPaid(record, payments)
+            );
+            
+            this.pendingUnpaidDates = unpaidRecords.map(record => record.date);
+            console.log('Updated pending dates:', this.pendingUnpaidDates);
+        } catch (error) {
+            console.error('Error updating pending dates:', error);
+        }
+    }
+
     async showPaymentModal() {
         const modal = document.getElementById('paymentModal');
         if (!modal) return;
@@ -3808,75 +3867,49 @@ class RServiceTracker {
         console.log('App update available');
     }
 
-    setupPWAInstall() {
+        setupPWAInstall() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
                 .then(registration => {
-                    
-                    registration.addEventListener('updatefound', () => {
-                        console.log('Service Worker update found');
-                    });
-                    
-                    this.serviceWorkerRegistration = registration;
-                })
-                .catch(error => {
-                    console.error('Service Worker registration failed:', error);
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch(error => {
+                    console.log('Service Worker registration failed:', error);
                 });
-        } else {
-            console.log('Service Worker not supported');
         }
 
-        let deferredPrompt;
-        let installBannerShown = false;
-        
-        // Check if already installed or dismissed
-        const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
-                           window.navigator.standalone === true;
-        const isDismissed = localStorage.getItem('pwa-install-dismissed') === 'true';
-        
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install banner if conditions are met
-            if (!isInstalled && !isDismissed && !installBannerShown) {
-                this.showInstallRecommendation(deferredPrompt);
-                installBannerShown = true;
-            }
-            
-            // Legacy install button support
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) {
-                installBtn.style.display = 'block';
-                installBtn.addEventListener('click', () => {
-                    this.triggerInstall(deferredPrompt);
-                });
-            }
+            window.deferredPrompt = e;
+            this.showInstallRecommendation(e);
         });
-        
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            this.hideInstallRecommendation();
-            
-            // Show success message
-            this.notifications.showToast('App installed successfully! You can now access it from your home screen.', 'success', 8000);
-            
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) {
-                installBtn.style.display = 'none';
-            }
-        });
-        
-        // Show banner after some user interaction if not shown yet
-        setTimeout(async () => {
-            if (!isInstalled && !installBannerShown) {
-                const shouldShowOnPaymentDay = await this.shouldShowPWAOnPaymentDay();
-                if ((!isDismissed || shouldShowOnPaymentDay) && deferredPrompt) {
-                    this.showInstallRecommendation(deferredPrompt);
-                    installBannerShown = true;
+
+        const installAppBtn = document.getElementById('installAppBtn');
+        if (installAppBtn) {
+            installAppBtn.addEventListener('click', async () => {
+                if (window.deferredPrompt) {
+                    window.deferredPrompt.prompt();
+                    const { outcome } = await window.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    window.deferredPrompt = null;
                 }
-            }
-        }, 30000); // Show after 30 seconds if not shown yet
+                const pwaInstallBanner = document.getElementById('pwaInstallBanner');
+                if (pwaInstallBanner) {
+                    pwaInstallBanner.style.display = 'none';
+                }
+            });
+        }
+
+        const dismissInstallBtn = document.getElementById('dismissInstallBtn');
+        if (dismissInstallBtn) {
+            dismissInstallBtn.addEventListener('click', () => {
+                const pwaInstallBanner = document.getElementById('pwaInstallBanner');
+                if (pwaInstallBanner) {
+                    pwaInstallBanner.style.display = 'none';
+                }
+            });
+        }
     }
 
     showInstallRecommendation(deferredPrompt) {
