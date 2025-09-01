@@ -1,0 +1,82 @@
+{
+  "name": "R-Service Tracker",
+  "short_name": "R-Service",
+  "description": "Professional work tracking and payment management system for freelancers and contractors",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#2196F3",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "prefer_related_applications": false,
+  "capture_links": "existing-client-navigate",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "assets/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "finance", "business", "utilities"],
+  "protocol_handlers": [{
+    "protocol": "web+rservice",
+    "url": "/?action=%s"
+  }],
+  "file_handlers": [{
+    "action": "/",
+    "accept": {
+      "application/json": [".json"]
+    }
+  }],
+  "shortcuts": [
+    {
+      "name": "Mark Work Done",
+      "short_name": "Work Done",
+      "description": "Quickly mark today's work as completed",
+      "url": "/?action=mark-done",
+      "icons": [{ "src": "assets/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Mark as Paid",
+      "short_name": "Mark Paid",
+      "description": "Mark work as paid and collect earnings",
+      "url": "/?action=mark-paid",
+      "icons": [{ "src": "assets/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "View Calendar",
+      "short_name": "Calendar",
+      "description": "View work and payment calendar",
+      "url": "/?action=calendar",
+      "icons": [{ "src": "assets/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="blue-light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="R-Service Tracker - Premium job tracking and payment management system">
+    <meta name="keywords" content="job tracker, payment tracker, work tracker, R-Service">
+    <meta name="author" content="R-Service">
+    <title>R-Service Tracker</title>
+    
+    <!-- Favicon - Comprehensive Support -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png">
+    <link rel="shortcut icon" href="assets/favicon.ico">
+    <meta name="msapplication-TileImage" content="assets/icon-192.png">
+    <meta name="msapplication-TileColor" content="#2196F3">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="R-Service Tracker">
+    <meta name="msapplication-TileColor" content="#2196F3">
+    <meta name="msapplication-navbutton-color" content="#2196F3">
+    <meta name="application-name" content="R-Service Tracker">
+    
+    <!-- Additional PWA and browser optimizations -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Google Fonts (optimized loading) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Font Awesome (optimized loading) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    
+    <!-- Chart.js (defer for better performance) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    
+    <!-- jsPDF (defer for better performance) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Constants -->
+    <script src="js/constants.js" defer></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="loading-text">R-Service Tracker</div>
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div class="loading-subtitle">Daily Work Tracker</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="mainContainer" class="main-container" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-check-circle"></i>
+                    <span class="logo-text"><span class="logo-part">R-Service</span><span class="logo-part"> Tracker</span></span>
+                </div>
+                <div class="header-actions">
+                    <button id="menuToggle" class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Side Menu -->
+        <div id="sideMenu" class="side-menu">
+            <div class="menu-header">
+                <h3>Settings</h3>
+                <button id="closeMenu" class="close-menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="menu-content">
+                <!-- Theme Section -->
+                <div class="menu-section">
+                    <h4><i class="fas fa-palette"></i> Theme</h4>
+                    
+                    <!-- Main Colors -->
+                    <div class="theme-subsection">
+                        <h5>Main Color</h5>
+                        <div class="color-options">
+                            <button class="color-btn active" data-color="blue">
+                                <span class="color-circle blue"></span>
+                                Blue
+                            </button>
+                            <button class="color-btn" data-color="orange">
+                                <span class="color-circle orange"></span>
+                                Orange
+                            </button>
+                            <button class="color-btn" data-color="green">
+                                <span class="color-circle green"></span>
+                                Green
+                            </button>
+                            <button class="color-btn" data-color="red">
+                                <span class="color-circle red"></span>
+                                Red
+                            </button>
+                            <button class="color-btn" data-color="monochrome">
+                                <span class="color-circle monochrome"></span>
+                                B&W
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Theme Mode -->
+                    <div class="theme-subsection">
+                        <h5>Theme Mode</h5>
+                        <div class="mode-options">
+                            <button class="mode-btn active" data-mode="light">
+                                <i class="fas fa-sun"></i>
+                                Light
+                            </button>
+                            <button class="mode-btn" data-mode="dark">
+                                <i class="fas fa-moon"></i>
+                                Dark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="menu-section">
+                    <h4><i class="fas fa-history"></i> History</h4>
+                    <button id="viewHistory" class="menu-option">
+                        <i class="fas fa-list"></i>
+                        View Work History
+                    </button>
+                    <button id="viewAnalytics" class="menu-option">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </button>
+                </div>
+
+                <!-- App Settings Section -->
+                <div class="menu-section">
+                    <h4><i class="fas fa-cog"></i> App Settings</h4>
+                    
+                    <div class="settings-group">
+                        <label for="incrementValue">
+                            <i class="fas fa-plus-circle"></i>
+                            Increment Value (₹)
+                        </label>
+                        <input type="number" id="incrementValue" min="1" max="100" value="25" class="settings-input">
+                        <small>Amount increment for payment options</small>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label for="paymentDuration">
+                            <i class="fas fa-calendar-days"></i>
+                            Payment Day Duration
+                        </label>
+                        <input type="number" id="paymentDuration" min="1" max="30" value="4" class="settings-input">
+                        <small>Days before payment can be collected</small>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label for="maxPaymentAmount">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Maximum Payment (₹)
+                        </label>
+                        <input type="number" id="maxPaymentAmount" min="100" max="10000" step="100" value="500" class="settings-input">
+                        <small>Maximum amount shown in payment options</small>
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button id="saveSettings" class="menu-option success">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                        <button id="resetSettings" class="menu-option">
+                            <i class="fas fa-undo"></i>
+                            Reset to Default
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Data Section -->
+                <div class="menu-section">
+                    <h4><i class="fas fa-database"></i> Data</h4>
+                    <button id="exportPDF" class="menu-option">
+                        <i class="fas fa-file-pdf"></i>
+                        Export PDF
+                    </button>
+                    <button id="clearData" class="menu-option danger">
+                        <i class="fas fa-trash"></i>
+                        Clear All Data
+                    </button>
+                </div>
+
+                <!-- About Section -->
+                <div class="menu-section">
+                    <h4><i class="fas fa-info-circle"></i> About</h4>
+                    <button id="aboutApp" class="menu-option">
+                        <i class="fas fa-question-circle"></i>
+                        About Tracker
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard -->
+            <div id="dashboard" class="dashboard">
+                <div class="dashboard-grid">
+                    <!-- Current Status Card -->
+                    <div class="card status-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-calendar-day"></i> Today's Status</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-info">
+                                <div class="date-display">
+                                    <span id="currentDate"></span>
+                                </div>
+                                <div class="work-status">
+                                    <div id="workStatus" class="status-badge pending">
+                                        <i class="fas fa-clock"></i>
+                                        Not Started
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="action-buttons">
+                                <button id="doneBtn" class="btn btn-primary">
+                                    <i class="fas fa-check"></i>
+                                    Mark as Done
+                                </button>
+                                <button id="paidBtn" class="btn btn-success enhanced-paid-btn">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    Mark as Paid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Earnings Card -->
+                    <div class="card earnings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-coins"></i> Earnings</h3>
+                            <button id="earningsInsightBtn" class="earnings-insight-btn" title="View Earnings Insights">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <div class="earnings-info">
+                                <div class="current-earnings">
+                                    <span class="amount">₹<span id="currentEarnings">0</span></span>
+                                    <span class="label">Current Balance</span>
+                                </div>
+                                <div class="days-worked">
+                                    <span class="count" id="daysWorked">0</span>
+                                    <span class="label">Days Worked</span>
+                                </div>
+                                <div class="total-earned">
+                                    <span class="amount">₹<span id="totalEarned">0</span></span>
+                                    <span class="label">Total Earned</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span id="progressLabel">Progress to Payday</span>
+                                    <span id="progressText">0/4 days</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="card actions-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <button id="viewBalanceSheet" class="action-btn">
+                                    <i class="fas fa-table"></i>
+                                    <span>Balance Sheet</span>
+                                </button>
+                                <button id="viewCalendar" class="action-btn">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Calendar</span>
+                                </button>
+                                <button id="viewCharts" class="action-btn">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Analytics</span>
+                                </button>
+                                <button id="dailyStreak" class="action-btn">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Streak: <span id="streakCount">0</span></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balance Sheet View -->
+            <div id="balanceSheetView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2><i class="fas fa-table"></i> Balance Sheet</h2>
+                    <button id="closeBalanceSheet" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div class="balance-sheet-content">
+                    <div class="sheet-filters">
+                        <select id="monthFilter">
+                            <option value="all">All Months</option>
+                        </select>
+                        <select id="yearFilter">
+                            <option value="all">All Years</option>
+                        </select>
+                    </div>
+                    <div id="balanceSheetTable" class="balance-sheet-table"></div>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analyticsView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2><i class="fas fa-chart-bar"></i> Analytics</h2>
+                    <button id="closeAnalytics" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div class="analytics-content">
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <canvas id="earningsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="workDaysChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendarView" class="view-section" style="display: none;">
+                <div class="view-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Calendar</h2>
+                    <button id="closeCalendar" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div class="calendar-content">
+                    <div class="calendar-controls">
+                        <button id="prevMonth" class="btn btn-secondary">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="calendarTitle"></h3>
+                        <button id="nextMonth" class="btn btn-secondary">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-container">
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>© R-Service <span id="currentYear">2025</span> • All rights reserved ❤️</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="aboutModal" class="modal-modern">
+        <div class="modal-content-modern about-modal-modern">
+            <div class="modal-header-modern">
+                <h3 class="modal-title-modern">
+                    <i class="fas fa-info-circle"></i>
+                    About R-Service Tracker
+                </h3>
+                <button class="close-modal-modern">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-modern">
+                <div class="about-content-modern">
+                    <div class="app-info-modern">
+                        <div class="app-title-modern">
+                            <i class="fas fa-check-circle app-icon-modern"></i>
+                            <h4>R-Service Tracker</h4>
+                        </div>
+                        <p class="app-description-modern">Professional work tracking and payment management system with advanced features for freelancers and contractors.</p>
+                    </div>
+                    
+                    <div class="features-modern">
+                        <div class="feature-card-modern">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Daily Work Tracking</span>
+                        </div>
+                        <div class="feature-card-modern">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Advanced Payment System</span>
+                        </div>
+                        <div class="feature-card-modern">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics & PDF Reports</span>
+                        </div>
+                        <div class="feature-card-modern">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Offline PWA</span>
+                        </div>
+                    </div>
+                    
+                    <div class="privacy-info-modern">
+                        <p><i class="fas fa-shield-alt"></i> <strong>Privacy First:</strong> All data stays on your device. No tracking, no ads.</p>
+                        <p><i class="fas fa-star"></i> Premium tracking solution for professionals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-modern">
+        <div class="modal-content-modern confirm-modal-modern">
+            <div class="modal-header-modern">
+                <h3 class="modal-title-modern">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Confirm Action
+                </h3>
+                <button class="close-modal-modern" id="closeConfirmModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-modern">
+                <p id="confirmMessage" class="confirm-message-modern"></p>
+                <div class="modal-actions-modern">
+                    <button id="confirmYes" class="btn-modern-danger">Yes, Continue</button>
+                    <button id="confirmNo" class="btn-modern-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Selection Modal -->
+    <div id="dateSelectionModal" class="modal-modern">
+        <div class="modal-content-modern date-modal-modern">
+            <div class="modal-header-modern">
+                <h3 class="modal-title-modern">
+                    <i class="fas fa-calendar-check"></i>
+                    Select Payment Date
+                </h3>
+                <button class="close-modal-modern" id="closeDateSelectionModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-modern">
+                <div class="date-selection-info-modern">
+                    <p>Choose when you want to mark the payment:</p>
+                </div>
+                <div class="date-options-modern">
+                    <button id="todayDateBtn" class="date-option-btn-modern">
+                        <i class="fas fa-calendar-day"></i>
+                        <div class="date-option-content-modern">
+                            <strong>Today</strong>
+                            <small>Mark payment for today</small>
+                        </div>
+                    </button>
+                    <button id="previousDateBtn" class="date-option-btn-modern">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div class="date-option-content-modern">
+                            <strong>Previous Date</strong>
+                            <small>Select specific dates from calendar</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Selection Modal -->
+    <div id="calendarSelectionModal" class="modal-modern">
+        <div class="modal-content-modern calendar-modal-modern">
+            <div class="modal-header-modern">
+                <h3 class="modal-title-modern">
+                    <i class="fas fa-calendar-check"></i>
+                    Select Work Dates
+                </h3>
+                <button class="close-modal-modern" id="closeCalendarSelectionModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-modern">
+                <!-- Calendar Display -->
+                <div class="unpaid-work-calendar" id="unpaidWorkCalendar">
+                    <!-- Calendar with unpaid work dates will be generated here -->
+                </div>
+                
+                <!-- Modern Direct Payment Section -->
+                <div class="direct-payment-clean" id="directPaymentSummary" style="display: none;">
+                    <div class="payment-preview-clean">
+                        <span class="preview-amount" id="directSelectedAmountDisplay">₹0</span>
+                        <span class="preview-type" id="directPaymentTypeDisplay">Regular</span>
+                    </div>
+                </div>
+                
+                <!-- Modern Payment Amount Section -->
+                <div class="payment-amounts-clean" id="paymentAmountSection" style="display: none;">
+                    <div class="payment-buttons-modern" id="calendarPaymentButtons">
+                        <!-- Buttons will be generated dynamically -->
+                    </div>
+                    
+                    <div id="calendarPaymentSummary" class="payment-confirmation-modern" style="display: none;">
+                        <span class="confirmation-amount-modern" id="calendarSelectedAmountDisplay">₹0</span>
+                        <span class="confirmation-type-modern" id="calendarPaymentTypeDisplay">Regular Payment</span>
+                        <div class="confirmation-actions-modern">
+                            <button id="confirmCalendarPaymentBtn" class="btn-modern-primary">
+                                Confirm
+                            </button>
+                            <button id="cancelCalendarPaymentBtn" class="btn-modern-secondary">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modern Calendar Summary -->
+                <div class="calendar-summary-modern" id="calendarPaymentSummaryCard">
+                    <div class="summary-header-modern">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Selection Summary</span>
+                    </div>
+                    <div class="summary-grid-modern">
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Days Selected</span>
+                            <span class="summary-value-modern" id="selectedDatesCount">0</span>
+                        </div>
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Total Amount</span>
+                            <span class="summary-value-modern" id="selectedAmountPreview">₹0</span>
+                        </div>
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Daily Rate</span>
+                            <span class="summary-value-modern" id="calendarDailyWageDisplay">₹25</span>
+                        </div>
+                        <div class="summary-item-modern" id="calendarPaymentSummaryTotal" style="display: none;">
+                            <span class="summary-label-modern">Payment Amount</span>
+                            <span class="summary-value-modern" id="calendarSelectedPaymentAmount">₹0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modern Actions -->
+                <div class="calendar-actions-modern">
+                    <button id="confirmCalendarDirectPaymentBtn" class="btn-modern-primary" disabled>
+                        Pay Selected
+                    </button>
+                    <button id="cancelCalendarSelectionBtn" class="btn-modern-secondary">
+                        Cancel
+                    </button>
+                </div>
+                
+                <!-- Simple Selection Info (kept for compatibility) -->
+                <div class="calendar-info-clean" style="display: none;">
+                    <span id="selectedDatesCountOld">0</span> days selected • 
+                    <span id="selectedAmountPreviewOld">₹0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Selection Modal -->
+    <div id="paymentModal" class="modal-modern">
+        <div class="modal-content-modern payment-modal-modern">
+            <div class="modal-header-modern">
+                <h3 class="modal-title-modern">
+                    <i class="fas fa-credit-card"></i>
+                    Payment
+                </h3>
+                <button class="close-modal-modern" id="closePaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-modern">
+                <!-- Modern Payment Buttons -->
+                <div class="payment-buttons-modern" id="paymentButtons">
+                    <!-- Buttons will be generated dynamically -->
+                </div>
+
+                <!-- Modern Payment Summary -->
+                <div class="payment-summary-modern" id="paymentSummaryCard">
+                    <div class="summary-header-modern">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Payment Summary</span>
+                    </div>
+                    <div class="summary-grid-modern">
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Unpaid Days</span>
+                            <span class="summary-value-modern" id="unpaidDaysCount">0</span>
+                        </div>
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Total Pending</span>
+                            <span class="summary-value-modern" id="pendingAmount">₹0</span>
+                        </div>
+                        <div class="summary-item-modern">
+                            <span class="summary-label-modern">Daily Rate</span>
+                            <span class="summary-value-modern" id="dailyWageDisplay">₹25</span>
+                        </div>
+                        <div class="summary-item-modern" id="paymentSummaryTotal" style="display: none;">
+                            <span class="summary-label-modern">Selected Payment</span>
+                            <span class="summary-value-modern" id="selectedPaymentAmount">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modern Confirmation -->
+                <div id="paymentConfirmation" class="payment-confirmation-modern" style="display: none;">
+                    <span class="confirmation-amount-modern" id="confirmAmount">₹0</span>
+                    <span class="confirmation-type-modern" id="confirmType">Regular Payment</span>
+                    <div class="confirmation-actions-modern">
+                        <button id="confirmPaymentBtn" class="btn-modern-primary">
+                            Confirm
+                        </button>
+                        <button id="cancelPaymentBtn" class="btn-modern-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Simple Status Display (kept for compatibility) -->
+                <div class="payment-status-clean" style="display: none;">
+                    <div class="status-item-clean">
+                        <span class="status-number" id="unpaidDaysCountOld">0</span>
+                        <span class="status-label-clean">unpaid days</span>
+                    </div>
+                    <div class="status-divider"></div>
+                    <div class="status-item-clean">
+                        <span class="status-number" id="pendingAmountOld">₹0</span>
+                        <span class="status-label-clean">pending amount</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Insight Tooltip -->
+    <div id="earningsInsightTooltip" class="earnings-tooltip">
+        <div class="tooltip-content">
+            <span id="earningsStatusMessage">Welcome to R-Service Tracker! Start working to begin tracking your earnings.</span>
+        </div>
+        <div class="tooltip-arrow"></div>
+    </div>
+
+    <!-- PWA Install Recommendation -->
+    <div id="pwaInstallBanner" class="pwa-install-banner" style="display: none;">
+        <div class="install-banner-content">
+            <div class="install-banner-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="install-banner-text">
+                <h4>Install R-Service Tracker</h4>
+                <p>Get quick access with shortcuts and offline functionality</p>
+            </div>
+            <div class="install-banner-actions">
+                <button id="installAppBtn" class="btn btn-primary install-btn">
+                    <i class="fas fa-download"></i> Install App
+                </button>
+                <button id="dismissInstallBtn" class="btn btn-secondary dismiss-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Audio Elements (now handled by Web Audio API in notifications.js) -->
+
+    <!-- Scripts (optimized loading order) -->
+    <script src="js/database.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/notifications.js" defer></script>
+    <script src="js/charts.js" defer></script>
+    <script src="js/calendar.js" defer></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>
